@@ -261,7 +261,7 @@ export default function ContactPage() {
 
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-8 text-center text-xs text-slate-500 font-bold uppercase tracking-wider">
-        © {new Date().getFullYear()} Emaar.PK Crescent Bay Property Advisory • {OWNER_NAME} ({ESTATE_NAME})
+       © 2026 Emaar.PK Crescent Bay Property Advisory • {OWNER_NAME} ...
       </footer>
     </div>
   );

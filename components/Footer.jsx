@@ -213,7 +213,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="mt-12 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] font-bold text-slate-400">
-          <p>© {new Date().getFullYear()} Emaar Crescent Bay Property Advisory. All Rights Reserved.</p>
+         <p>© 2026 Emaar Crescent Bay Property Advisory. All Rights Reserved.</p>
           <div className="flex items-center gap-4">
             <span>Powered by {ESTATE_NAME}</span>
             <span>•</span>
