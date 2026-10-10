@@ -9,8 +9,6 @@ cloudinary.config({
   secure: true,
 });
 
-export const runtime = 'nodejs';
-
 export async function POST(request) {
   try {
     const formData = await request.formData();
@@ -23,15 +21,12 @@ export async function POST(request) {
       );
     }
 
-    // Convert file blob to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Auto-detect whether it is an image or video
     const isVideo = file.type?.startsWith('video');
     const resourceType = isVideo ? 'video' : 'image';
 
-    // Stream upload directly to Cloudinary
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
