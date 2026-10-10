@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import CustomSelect from '@/components/CustomSelect';
@@ -58,11 +60,12 @@ export default function AdminPage() {
     { value: 'Under Offer', label: 'Under Offer' },
     { value: 'Sold', label: 'Sold' },
   ];
-
-  useEffect(() => {
-    const auth = localStorage.getItem('emaar_admin_session');
-    if (auth === 'true') {
-      setIsAuthenticated(true);
+useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const auth = localStorage.getItem('emaar_admin_session');
+      if (auth === 'true') {
+        setIsAuthenticated(true);
+      }
     }
   }, []);
 
