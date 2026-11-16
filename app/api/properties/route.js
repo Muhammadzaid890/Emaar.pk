@@ -21,11 +21,15 @@ async function ensureColumns(sql) {
       image_url TEXT,
       video_url TEXT,
       status VARCHAR(50) DEFAULT 'Available',
+      agent_id INT,
+      views_count INT DEFAULT 0,
+      whatsapp_clicks INT DEFAULT 0,
+      call_clicks INT DEFAULT 0,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
   `;
 
-  // Add description if not exists
+  // Ensure all required columns exist
   await sql`ALTER TABLE emaar_properties ADD COLUMN IF NOT EXISTS description TEXT;`;
   await sql`ALTER TABLE emaar_properties ADD COLUMN IF NOT EXISTS down_payment_pkr BIGINT DEFAULT 0;`;
   await sql`ALTER TABLE emaar_properties ADD COLUMN IF NOT EXISTS monthly_installment_pkr BIGINT DEFAULT 0;`;
@@ -34,6 +38,10 @@ async function ensureColumns(sql) {
   await sql`ALTER TABLE emaar_properties ADD COLUMN IF NOT EXISTS video_url TEXT;`;
   await sql`ALTER TABLE emaar_properties ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT TRUE;`;
   await sql`ALTER TABLE emaar_properties ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE;`;
+  await sql`ALTER TABLE emaar_properties ADD COLUMN IF NOT EXISTS agent_id INT;`;
+  await sql`ALTER TABLE emaar_properties ADD COLUMN IF NOT EXISTS views_count INT DEFAULT 0;`;
+  await sql`ALTER TABLE emaar_properties ADD COLUMN IF NOT EXISTS whatsapp_clicks INT DEFAULT 0;`;
+  await sql`ALTER TABLE emaar_properties ADD COLUMN IF NOT EXISTS call_clicks INT DEFAULT 0;`;
 }
 
 export async function GET(request) {
@@ -47,20 +55,24 @@ export async function GET(request) {
     const query = searchParams.get('query');
     const intent = searchParams.get('intent');
     const featured = searchParams.get('featured');
+    const agentId = searchParams.get('agentId');
     const showDeleted = searchParams.get('deleted') === 'true';
 
     const properties = await sql`
-      SELECT * FROM emaar_properties
-      WHERE is_deleted = ${showDeleted}
-        AND (${tower ? tower : null}::text IS NULL OR tower_name ILIKE ${'%' + (tower || '') + '%'})
-        AND (${unitType ? unitType : null}::text IS NULL OR unit_type ILIKE ${'%' + (unitType || '') + '%'})
-        AND (${intent ? intent : null}::text IS NULL OR purpose = ${intent || 'SALE'})
-        AND (${featured ? featured === 'true' : null}::boolean IS NULL OR is_featured = true)
+      SELECT p.*, a.name AS agent_name, a.phone AS agent_phone, a.profile_image AS agent_image
+      FROM emaar_properties p
+      LEFT JOIN agents a ON p.agent_id = a.id
+      WHERE p.is_deleted = ${showDeleted}
+        AND (${tower ? tower : null}::text IS NULL OR p.tower_name ILIKE ${'%' + (tower || '') + '%'})
+        AND (${unitType ? unitType : null}::text IS NULL OR p.unit_type ILIKE ${'%' + (unitType || '') + '%'})
+        AND (${intent ? intent : null}::text IS NULL OR p.purpose = ${intent || 'SALE'})
+        AND (${featured ? featured === 'true' : null}::boolean IS NULL OR p.is_featured = true)
+        AND (${agentId ? Number(agentId) : null}::int IS NULL OR p.agent_id = ${agentId ? Number(agentId) : null})
         AND (${query ? query : null}::text IS NULL OR (
-          title ILIKE ${'%' + (query || '') + '%'} 
-          OR tower_name ILIKE ${'%' + (query || '') + '%'}
+          p.title ILIKE ${'%' + (query || '') + '%'} 
+          OR p.tower_name ILIKE ${'%' + (query || '') + '%'}
         ))
-      ORDER BY id DESC;
+      ORDER BY p.id DESC;
     `;
 
     return NextResponse.json({ success: true, count: properties.length, properties });
@@ -84,8 +96,11 @@ export async function POST(request) {
       unit_type,
       purpose = 'SALE',
       price_pkr,
+      down_payment = 0,
       down_payment_pkr = 0,
+      monthly_installment = 0,
       monthly_installment_pkr = 0,
+      tenure = '',
       installment_duration = '',
       area_sqft,
       floor_number = 1,
@@ -96,10 +111,15 @@ export async function POST(request) {
       image_url = '',
       images = [],
       video_url = '',
-      status = 'Available'
+      status = 'Available',
+      agent_id = null
     } = body;
 
     const primaryImage = image_url || (images.length > 0 ? images[0] : '');
+    const finalDownPayment = Number(down_payment_pkr || down_payment) || 0;
+    const finalMonthly = Number(monthly_installment_pkr || monthly_installment) || 0;
+    const finalTenure = installment_duration || tenure || '';
+    const finalAgentId = agent_id ? Number(agent_id) : null;
 
     const inserted = await sql`
       INSERT INTO emaar_properties (
@@ -107,13 +127,13 @@ export async function POST(request) {
         down_payment_pkr, monthly_installment_pkr, installment_duration,
         area_sqft, floor_number, bedrooms, bathrooms, 
         is_furnished, is_featured, is_deleted, 
-        image_url, images, video_url, status
+        image_url, images, video_url, status, agent_id
       ) VALUES (
         ${title}, ${description}, ${tower_name}, ${unit_type}, ${purpose}, ${price_pkr},
-        ${down_payment_pkr}, ${monthly_installment_pkr}, ${installment_duration},
+        ${finalDownPayment}, ${finalMonthly}, ${finalTenure},
         ${area_sqft}, ${floor_number}, ${bedrooms}, ${bathrooms},
         ${is_furnished}, ${is_featured}, false,
-        ${primaryImage}, ${images}, ${video_url}, ${status}
+        ${primaryImage}, ${images}, ${video_url}, ${status}, ${finalAgentId}
       )
       RETURNING *;
     `;

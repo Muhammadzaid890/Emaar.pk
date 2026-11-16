@@ -3,17 +3,16 @@ import { neon } from '@neondatabase/serverless';
 
 const sql = neon(process.env.DATABASE_URL);
 
-// Get all agents + unke total ads aur views ka hisab
 export async function GET() {
   try {
     const agents = await sql`
       SELECT 
-        a.id, a.name, a.email, a.phone, a.role, a.is_active, a.created_at,
+        a.id, a.name, a.email, a.phone, a.role, a.is_active, a.profile_image, a.created_at,
         COUNT(p.id)::int AS total_ads,
         COALESCE(SUM(p.views_count), 0)::int AS total_views,
         COALESCE(SUM(p.whatsapp_clicks + p.call_clicks), 0)::int AS total_clicks
       FROM agents a
-      LEFT JOIN properties p ON p.agent_id = a.id
+      LEFT JOIN emaar_properties p ON p.agent_id = a.id
       WHERE a.role = 'AGENT'
       GROUP BY a.id
       ORDER BY a.created_at DESC
@@ -24,7 +23,6 @@ export async function GET() {
   }
 }
 
-// Create New Agent
 export async function POST(request) {
   try {
     const { name, email, password, phone } = await request.json();
@@ -44,7 +42,6 @@ export async function POST(request) {
   }
 }
 
-// Delete or Toggle Agent Status
 export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url);
