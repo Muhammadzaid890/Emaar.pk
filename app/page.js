@@ -7,7 +7,7 @@ import ExploreTabs from '@/components/ExploreTabs';
 import AdminModal from '@/components/AdminModal';
 import { EMAAR_TOWERS } from '@/lib/constants';
 import { 
-  Building2, MessageSquare, Phone, Bed, Bath, 
+  Home, Key, Building2, MessageSquare, Phone, Bed, Bath, 
   Maximize2, PlusCircle, MapPin, ChevronDown, ChevronUp, 
   X, ChevronLeft, ChevronRight, UserCheck
 } from 'lucide-react';
@@ -21,7 +21,10 @@ export default function HomePage() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Default state: all accordions are closed initially
+  // Main Category Accordion State ('SALE', 'RENT', 'BOOKING')
+  const [openMainCategory, setOpenMainCategory] = useState(null);
+
+  // Nested Tower Accordion State
   const [openTowers, setOpenTowers] = useState({});
 
   // Modal State
@@ -35,7 +38,6 @@ export default function HomePage() {
       const data = await res.json();
       if (data.success) {
         setProperties(data.properties || []);
-        // Shuru me sare towers CLOSED honge
         setOpenTowers({});
       }
     } catch (e) {
@@ -49,6 +51,10 @@ export default function HomePage() {
     fetchProperties();
   }, []);
 
+  const toggleMainCategory = (key) => {
+    setOpenMainCategory(prev => (prev === key ? null : key));
+  };
+
   const toggleTower = (key) => {
     setOpenTowers(prev => ({
       ...prev,
@@ -57,14 +63,16 @@ export default function HomePage() {
   };
 
   const handleSearch = (criteria) => {
-    const targetId = criteria?.intent === 'RENT' ? 'rent' : 'sale';
-    const el = document.getElementById(targetId);
+    const intent = criteria?.intent === 'RENT' ? 'RENT' : 'SALE';
+    setOpenMainCategory(intent);
+    const el = document.getElementById('explore-properties');
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleTabSelect = ({ intent }) => {
-    const targetId = intent === 'RENT' ? 'rent' : 'sale';
-    const el = document.getElementById(targetId);
+    const selectedIntent = intent || 'SALE';
+    setOpenMainCategory(selectedIntent);
+    const el = document.getElementById('explore-properties');
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -118,7 +126,6 @@ export default function HomePage() {
           if (towerAds.length === 0) return null;
 
           const key = `${sectionPurpose}_${towerName}`;
-          // Default CLOSED: will only open if specifically clicked
           const isOpen = Boolean(openTowers[key]);
 
           return (
@@ -147,7 +154,7 @@ export default function HomePage() {
                 </div>
               </button>
 
-              {/* Inside Ads (Only visible when user clicks) */}
+              {/* Inside Ads */}
               {isOpen && (
                 <div className="pl-2 sm:pl-4 space-y-2.5 pt-1">
                   {towerAds.map((ad) => (
@@ -224,6 +231,30 @@ export default function HomePage() {
     );
   };
 
+  const mainCategories = [
+    {
+      key: 'SALE',
+      title: 'PROPERTIES FOR SALE',
+      subtitle: 'Apartments, plots & houses',
+      icon: Home,
+      count: properties.filter(p => p.purpose === 'SALE' && p.is_featured).length
+    },
+    {
+      key: 'RENT',
+      title: 'PROPERTIES FOR RENT',
+      subtitle: 'Residential & commercial rentals',
+      icon: Key,
+      count: properties.filter(p => p.purpose === 'RENT' && p.is_featured).length
+    },
+    {
+      key: 'BOOKING',
+      title: 'NEW PROJECTS & BOOKING',
+      subtitle: 'Pre-launch & installment projects',
+      icon: Building2,
+      count: properties.filter(p => p.purpose === 'BOOKING' && p.is_featured).length
+    }
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-white text-slate-900 font-sans">
       <Navbar onLoginClick={() => setAdminOpen(true)} />
@@ -238,48 +269,73 @@ export default function HomePage() {
         <ExploreTabs onSelectCategory={handleTabSelect} />
       </div>
 
-      {/* Main Sections */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-12 flex-1">
-        
-        {/* 1. BOOKING SECTION */}
-        <section id="booking" className="space-y-4">
-          <div className="border-b border-sky-100 pb-3">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#38bdf8] bg-sky-50 px-3 py-1 rounded-full border border-sky-200 inline-block mb-1">
-              Installment & Booking
-            </span>
-            <h2 className="text-xl font-black text-black uppercase tracking-tight">
-              Featured Booking Opportunities by Towers
-            </h2>
-          </div>
-          {renderTowerAccordions('BOOKING')}
-        </section>
+      {/* Explore Properties Section */}
+      <div id="explore-properties" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-1">
+        <div className="mb-6">
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+            Explore Properties
+          </h2>
+          <p className="text-sm text-slate-500 font-medium mt-1">
+            Find your perfect property with Emaar.pk
+          </p>
+        </div>
 
-        {/* 2. FOR SALE SECTION */}
-        <section id="sale" className="space-y-4">
-          <div className="border-b border-sky-100 pb-3">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#38bdf8] bg-sky-50 px-3 py-1 rounded-full border border-sky-200 inline-block mb-1">
-              For Sale
-            </span>
-            <h2 className="text-xl font-black text-black uppercase tracking-tight">
-              Verified Seafront Apartments by Towers
-            </h2>
-          </div>
-          {renderTowerAccordions('SALE')}
-        </section>
+        <div className="space-y-4">
+          {mainCategories.map((cat) => {
+            const IconComponent = cat.icon;
+            const isCategoryOpen = openMainCategory === cat.key;
 
-        {/* 3. FOR RENT SECTION */}
-        <section id="rent" className="space-y-4">
-          <div className="border-b border-sky-100 pb-3">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#38bdf8] bg-sky-50 px-3 py-1 rounded-full border border-sky-200 inline-block mb-1">
-              For Rent
-            </span>
-            <h2 className="text-xl font-black text-black uppercase tracking-tight">
-              Verified Luxury Rentals by Towers
-            </h2>
-          </div>
-          {renderTowerAccordions('RENT')}
-        </section>
+            return (
+              <div
+                key={cat.key}
+                className="bg-[#f3f5f7] border border-slate-200/90 rounded-2xl overflow-hidden shadow-sm transition-all"
+              >
+                {/* Main Accordion Strip */}
+                <button
+                  type="button"
+                  onClick={() => toggleMainCategory(cat.key)}
+                  className="w-full px-5 py-4 sm:px-6 sm:py-5 flex items-center justify-between text-left hover:bg-[#eaedf1] transition-colors cursor-pointer select-none"
+                >
+                  <div className="flex items-center gap-4 sm:gap-5">
+                    {/* Dark Navy Square Box with Gold Icon */}
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#0B1A28] flex items-center justify-center flex-shrink-0 shadow-md">
+                      <IconComponent className="w-6 h-6 text-[#E5B264]" strokeWidth={1.8} />
+                    </div>
 
+                    {/* Title & Subtitle */}
+                    <div>
+                      <h3 className="text-base sm:text-xl font-black text-slate-900 tracking-tight uppercase">
+                        {cat.title}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+                        {cat.subtitle}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right Side Green Badge + Arrow */}
+                  <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0 ml-2">
+                    <span className="bg-emerald-100 text-emerald-700 font-extrabold text-xs sm:text-sm px-3.5 py-1 rounded-full">
+                      {cat.count} Ads
+                    </span>
+                    {isCategoryOpen ? (
+                      <ChevronUp className="w-5 h-5 text-slate-700 transition-transform" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-slate-700 transition-transform" />
+                    )}
+                  </div>
+                </button>
+
+                {/* Expanded Content (Tower-wise Accordions & Ads) */}
+                {isCategoryOpen && (
+                  <div className="p-4 sm:p-6 bg-white border-t border-slate-200">
+                    {renderTowerAccordions(cat.key)}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Detail Modal Popup */}
