@@ -395,7 +395,7 @@ export default function DashboardPage() {
                 <input
                   type="email"
                   required
-                  placeholder="admin@emaar.pk or agent@emaar.pk"
+                  placeholder="example@emaar.pk"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 rounded-xl bg-white border border-sky-200 text-sm text-black font-semibold focus:outline-none focus:border-[#38bdf8]"
