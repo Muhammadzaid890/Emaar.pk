@@ -11,8 +11,8 @@ import {
   CreditCard, Wallet 
 } from 'lucide-react';
 
-const OWNER_NAME = "Zeshan Khurshid";
-const PHONE_NUMBER = "03331234201";
+const DEFAULT_POSTER_NAME = "Zeeshan Khursheed";
+const DEFAULT_PHONE = "03331234201";
 
 export default function BookingPage() {
   const [properties, setProperties] = useState([]);
@@ -43,6 +43,13 @@ export default function BookingPage() {
     if (pkr >= 10000000) return `PKR ${(pkr / 10000000).toFixed(2)} Crore`;
     if (pkr >= 100000) return `PKR ${(pkr / 100000).toFixed(2)} Lac`;
     return `PKR ${Number(pkr).toLocaleString()}`;
+  };
+
+  const getPosterName = (item) => item?.poster_name || item?.agent_name || DEFAULT_POSTER_NAME;
+  const getPosterPhone = (item) => item?.poster_phone || item?.agent_phone || DEFAULT_PHONE;
+  const formatWhatsAppPhone = (phone) => {
+    const clean = String(phone).replace(/\D/g, '');
+    return clean.startsWith('0') ? `92${clean.slice(1)}` : clean;
   };
 
   const towerOptions = [
@@ -121,104 +128,109 @@ export default function BookingPage() {
           </div>
         ) : (
           <div className="space-y-3.5">
-            {filtered.map((item) => (
-              <div 
-                key={item.id} 
-                className="bg-white border border-slate-200 hover:border-[#38bdf8] rounded-2xl p-4 sm:p-5 transition-all hover:shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-5 group"
-              >
-                <div className="flex items-start sm:items-center gap-4 w-full md:w-auto">
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-slate-100 flex-shrink-0 overflow-hidden relative border border-slate-100">
-                    <img 
-                      src={item.image_url || 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80'} 
-                      alt={item.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-                    />
-                    <span className="absolute bottom-1.5 left-1.5 bg-[#38bdf8] text-[9px] font-black uppercase text-white px-1.5 py-0.5 rounded">
-                      Booking Open
-                    </span>
+            {filtered.map((item) => {
+              const posterName = getPosterName(item);
+              const posterPhone = getPosterPhone(item);
+
+              return (
+                <div 
+                  key={item.id} 
+                  className="bg-white border border-slate-200 hover:border-[#38bdf8] rounded-2xl p-4 sm:p-5 transition-all hover:shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-5 group"
+                >
+                  <div className="flex items-start sm:items-center gap-4 w-full md:w-auto">
+                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-slate-100 flex-shrink-0 overflow-hidden relative border border-slate-100">
+                      <img 
+                        src={item.image_url || 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80'} 
+                        alt={item.title} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                      />
+                      <span className="absolute bottom-1.5 left-1.5 bg-[#38bdf8] text-[9px] font-black uppercase text-white px-1.5 py-0.5 rounded">
+                        Booking Open
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-[#38bdf8] bg-sky-50 px-2.5 py-0.5 rounded border border-sky-100 flex items-center gap-1">
+                          <Building2 className="w-3 h-3" /> {item.tower_name}
+                        </span>
+                        <span className="text-[10px] font-bold uppercase text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                          {item.unit_type}
+                        </span>
+                        {item.installment_duration && (
+                          <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded flex items-center gap-1">
+                            <CalendarClock className="w-3 h-3" /> {item.installment_duration}
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="text-sm sm:text-base font-black text-slate-900 uppercase tracking-tight">
+                        {item.title}
+                      </h3>
+
+                      <div className="flex items-center gap-1 text-[11px] text-slate-400 font-semibold">
+                        <MapPin className="w-3 h-3 text-slate-400" /> Crescent Bay, DHA Phase 8, Karachi
+                      </div>
+
+                      {/* Breakdown: Down Payment & Monthly Installment */}
+                      <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold pt-1">
+                        {item.down_payment_pkr > 0 && (
+                          <span className="flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                            <Wallet className="w-3 h-3" /> Down: PKR {Number(item.down_payment_pkr).toLocaleString()}
+                          </span>
+                        )}
+                        {item.monthly_installment_pkr > 0 && (
+                          <span className="flex items-center gap-1 text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-100">
+                            <CreditCard className="w-3 h-3" /> Monthly: PKR {Number(item.monthly_installment_pkr).toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-4 text-xs font-bold text-slate-600 pt-1">
+                        <span className="flex items-center gap-1">
+                          <Bed className="w-3.5 h-3.5 text-slate-400" /> {item.bedrooms || 2} Beds
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Bath className="w-3.5 h-3.5 text-slate-400" /> {item.bathrooms || 2} Baths
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Maximize2 className="w-3.5 h-3.5 text-slate-400" /> {item.area_sqft} Sq. Ft
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-[#38bdf8] bg-sky-50 px-2.5 py-0.5 rounded border border-sky-100 flex items-center gap-1">
-                        <Building2 className="w-3 h-3" /> {item.tower_name}
-                      </span>
-                      <span className="text-[10px] font-bold uppercase text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                        {item.unit_type}
-                      </span>
-                      {item.installment_duration && (
-                        <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded flex items-center gap-1">
-                          <CalendarClock className="w-3 h-3" /> {item.installment_duration}
-                        </span>
-                      )}
+                  <div className="flex items-center justify-between md:justify-end gap-5 w-full md:w-auto pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+                    <div className="text-left md:text-right">
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Price</div>
+                      <div className="text-base sm:text-lg font-black text-slate-950">
+                        {formatPrice(item.price_pkr)}
+                      </div>
+                      <div className="text-[10px] text-slate-500 font-medium">
+                        Official Advisor: {posterName}
+                      </div>
                     </div>
 
-                    <h3 className="text-sm sm:text-base font-black text-slate-900 uppercase tracking-tight">
-                      {item.title}
-                    </h3>
-
-                    <div className="flex items-center gap-1 text-[11px] text-slate-400 font-semibold">
-                      <MapPin className="w-3 h-3 text-slate-400" /> Crescent Bay, DHA Phase 8, Karachi
-                    </div>
-
-                    {/* Breakdown: Down Payment & Monthly Installment */}
-                    <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold pt-1">
-                      {item.down_payment_pkr > 0 && (
-                        <span className="flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
-                          <Wallet className="w-3 h-3" /> Down: PKR {Number(item.down_payment_pkr).toLocaleString()}
-                        </span>
-                      )}
-                      {item.monthly_installment_pkr > 0 && (
-                        <span className="flex items-center gap-1 text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-100">
-                          <CreditCard className="w-3 h-3" /> Monthly: PKR {Number(item.monthly_installment_pkr).toLocaleString()}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-4 text-xs font-bold text-slate-600 pt-1">
-                      <span className="flex items-center gap-1">
-                        <Bed className="w-3.5 h-3.5 text-slate-400" /> {item.bedrooms || 2} Beds
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Bath className="w-3.5 h-3.5 text-slate-400" /> {item.bathrooms || 2} Baths
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Maximize2 className="w-3.5 h-3.5 text-slate-400" /> {item.area_sqft} Sq. Ft
-                      </span>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <a
+                        href={`https://wa.me/${formatWhatsAppPhone(posterPhone)}?text=AOA%20${encodeURIComponent(posterName)},%20I%20want%20to%20inquire%20about%20Installment%20Booking%20unit:%20${encodeURIComponent(item.title)}%20(${encodeURIComponent(item.tower_name)}).`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="bg-[#38bdf8] hover:bg-[#0ea5e9] text-white font-black px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" /> Book Now
+                      </a>
+                      <a
+                        href={`tel:${posterPhone}`}
+                        className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-black px-3.5 py-2.5 rounded-xl text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all active:scale-95"
+                      >
+                        <Phone className="w-3.5 h-3.5" /> Call
+                      </a>
                     </div>
                   </div>
                 </div>
-
-                <div className="flex items-center justify-between md:justify-end gap-5 w-full md:w-auto pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-                  <div className="text-left md:text-right">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Price</div>
-                    <div className="text-base sm:text-lg font-black text-slate-950">
-                      {formatPrice(item.price_pkr)}
-                    </div>
-                    <div className="text-[10px] text-slate-500 font-medium">
-                      Official Advisor: {OWNER_NAME}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <a
-                      href={`https://wa.me/923331234201?text=AOA%20Zeshan%20Bhai,%20I%20want%20to%20inquire%20about%20Installment%20Booking%20unit:%20${encodeURIComponent(item.title)}%20(${encodeURIComponent(item.tower_name)}).`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="bg-[#38bdf8] hover:bg-[#0ea5e9] text-white font-black px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5" /> Book Now
-                    </a>
-                    <a
-                      href={`tel:${PHONE_NUMBER}`}
-                      className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-black px-3.5 py-2.5 rounded-xl text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all active:scale-95"
-                    >
-                      <Phone className="w-3.5 h-3.5" /> Call
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
