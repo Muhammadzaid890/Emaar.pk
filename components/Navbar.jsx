@@ -30,11 +30,14 @@ const navLinks = [
               <span className="text-2xl sm:text-3xl font-extrabold tracking-[-0.03em] text-slate-900">
                 maar
               </span>
+              <span className="font-serif text-3xl sm:text-4xl font-extrabold text-black transform scale-y-125 inline-block mr-[2px] transition-transform duration-300 group-hover:scale-y-130">
+                K
+              </span>
               <span className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 ml-[2px]">
-                .PK
+                arachi
               </span>
               {/* Subtle cyan accent dot */}
-              <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] ml-1 self-end mb-1"></span>
+              
             </div>
 
             {/* Hover Underline (Matching Search Button #38bdf8) */}

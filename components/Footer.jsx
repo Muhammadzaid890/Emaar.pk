@@ -49,16 +49,19 @@ export default function Footer() {
           {/* Column 1: Brand & Official Advisory (5 Cols) */}
           <div className="lg:col-span-5 space-y-5">
             <Link href="/" className="inline-flex items-baseline tracking-tight group">
-              <span className="font-serif text-3xl font-extrabold text-black transform scale-y-125 inline-block mr-[2px]">
+              <span className="font-serif text-3xl sm:text-4xl font-extrabold text-black transform scale-y-125 inline-block mr-[2px] transition-transform duration-300 group-hover:scale-y-130">
                 E
               </span>
               <span className="text-2xl font-extrabold tracking-[-0.03em] text-slate-900">
                 maar
               </span>
-              <span className="text-2xl font-black tracking-tight text-slate-900 ml-[2px]">
-                .PK
+              <span className="font-serif text-3xl sm:text-4xl font-extrabold text-black transform scale-y-125 inline-block mr-[2px] transition-transform duration-300 group-hover:scale-y-130">
+                K
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] ml-1 self-end mb-1" />
+              <span className="text-2xl font-black tracking-tight text-slate-900 ml-[2px]">
+                arachi
+              </span>
+              
             </Link>
 
             <p className="text-xs text-slate-600 font-medium leading-relaxed max-w-sm">

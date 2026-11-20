@@ -3,7 +3,7 @@ import Footer from '@/components/Footer';
 import WhatsAppFloatingButton from '@/components/WhatsAppFloatingButton';
 
 export const metadata = {
-  title: 'Emaar Crescent Bay Karachi | Sadaf Estate',
+  title: 'Emaar Crescent Bay Karachi',
   description: 'Luxury seafront apartments for sale, rent, and booking in Emaar Karachi.',
 };
 
