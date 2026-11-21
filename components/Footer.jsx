@@ -84,7 +84,7 @@ export default function Footer() {
               <div className="flex items-center gap-3">
                 {/* Facebook (#1877F2) */}
                 <a
-                  href="https://facebook.com"
+                  href="https://www.facebook.com/share/1Dmz9Wbo6P/"
                   target="_blank"
                   rel="noreferrer"
                   title="Facebook"
@@ -95,7 +95,7 @@ export default function Footer() {
 
                 {/* Instagram (Radiant Gradient) */}
                 <a
-                  href="https://instagram.com"
+                  href="https://www.instagram.com/emaarkarachi.pk?cnvx=MTd1YzgyN20xOGc1bw=="
                   target="_blank"
                   rel="noreferrer"
                   title="Instagram"
@@ -106,7 +106,7 @@ export default function Footer() {
 
                 {/* YouTube (#FF0000) */}
                 <a
-                  href="https://youtube.com"
+                  href="https://www.youtube.com/@EmaarKarachiPk"
                   target="_blank"
                   rel="noreferrer"
                   title="YouTube"
@@ -117,7 +117,7 @@ export default function Footer() {
 
                 {/* Twitter / X (Deep Modern Black) */}
                 <a
-                  href="https://twitter.com"
+                  href="https://x.com/EmaarKarachiPK"
                   target="_blank"
                   rel="noreferrer"
                   title="Twitter / X"
